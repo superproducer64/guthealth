@@ -1055,6 +1055,139 @@
     border-radius: 8px;
     margin-bottom: 12px;
   }
+
+  /* ====== URGENCY / DURATION / SYMPTOMS ====== */
+  .urgency-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    margin-bottom: 4px;
+  }
+
+  .urgency-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: none;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+
+  .urgency-btn:hover { background: var(--surface2); }
+  .urgency-btn.selected { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+  .urgency-btn .u-emoji { font-size: 22px; }
+
+  .duration-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .duration-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--accent);
+  }
+
+  .duration-slider {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    margin-bottom: 4px;
+  }
+
+  .duration-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  .duration-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  .duration-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+  }
+
+  .symptom-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .symptom-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .symptom-item input[type="checkbox"] {
+    display: none;
+  }
+
+  .symptom-box {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    font-size: 12px;
+  }
+
+  .symptom-item input:checked + .symptom-box {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .symptom-label {
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .form-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+  }
 </style>
 </head>
 <body>
@@ -1239,9 +1372,45 @@
         <div class="color-swatch-preview" id="urinePreview"></div>
         <span id="urineColorLabel">Select a color above or scan</span>
       </div>
-      <div class="form-group" style="margin-top:14px">
+
+      <div class="form-divider"></div>
+
+      <!-- URGENCY -->
+      <div class="form-group">
+        <label class="form-label">Urgency Level</label>
+        <div class="urgency-grid" id="urineUrgencyGrid">
+          <button class="urgency-btn selected" data-level="1" onclick="selectUrgency('urine',1,this)"><span class="u-emoji">😌</span>No rush</button>
+          <button class="urgency-btn" data-level="2" onclick="selectUrgency('urine',2,this)"><span class="u-emoji">🤔</span>Mild urgency</button>
+          <button class="urgency-btn" data-level="3" onclick="selectUrgency('urine',3,this)"><span class="u-emoji">😰</span>Moderate urgency</button>
+          <button class="urgency-btn" data-level="4" onclick="selectUrgency('urine',4,this)"><span class="u-emoji">😱</span>Very urgent</button>
+        </div>
+      </div>
+
+      <!-- DURATION -->
+      <div class="form-group">
+        <div class="duration-row">
+          <label class="form-label" style="margin:0">Duration</label>
+          <span class="duration-value" id="urineDurVal">1 min</span>
+        </div>
+        <input type="range" class="duration-slider" id="urineDuration" min="0" max="30" value="1"
+          oninput="document.getElementById('urineDurVal').textContent=this.value<1?'<1 min':this.value+' min'">
+        <div class="duration-ticks"><span>&lt;1</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30+</span></div>
+      </div>
+
+      <!-- SYMPTOMS -->
+      <div class="form-group">
+        <label class="form-label">Symptoms</label>
+        <div class="symptom-list">
+          <label class="symptom-item"><input type="checkbox" id="uSym1"><div class="symptom-box">✓</div><span class="symptom-label">Felt complete / satisfying</span></label>
+          <label class="symptom-item"><input type="checkbox" id="uSym2"><div class="symptom-box">✓</div><span class="symptom-label">Burning or discomfort</span></label>
+          <label class="symptom-item"><input type="checkbox" id="uSym3"><div class="symptom-box">✓</div><span class="symptom-label">Cloudy or unusual appearance</span></label>
+          <label class="symptom-item"><input type="checkbox" id="uSym4"><div class="symptom-box">✓</div><span class="symptom-label">Noticed blood</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
         <label class="form-label">Notes (optional)</label>
-        <textarea class="notes-input" id="urineNotes" rows="2" placeholder="Any notes..."></textarea>
+        <textarea class="notes-input" id="urineNotes" rows="2" placeholder="Any additional observations, foods eaten, medications, etc."></textarea>
       </div>
       <button class="btn btn-primary" style="width:100%" onclick="submitLog('urine')">Log Urine</button>
     </div>
@@ -1250,9 +1419,45 @@
     <div class="modal-form" id="formBowel">
       <label class="form-label">Bristol Stool Scale — Select Type</label>
       <div class="bristol-grid" id="bristolSelect"></div>
-      <div class="form-group" style="margin-top:14px">
+
+      <div class="form-divider"></div>
+
+      <!-- URGENCY -->
+      <div class="form-group">
+        <label class="form-label">Urgency Level</label>
+        <div class="urgency-grid" id="bowelUrgencyGrid">
+          <button class="urgency-btn selected" data-level="1" onclick="selectUrgency('bowel',1,this)"><span class="u-emoji">😌</span>No rush</button>
+          <button class="urgency-btn" data-level="2" onclick="selectUrgency('bowel',2,this)"><span class="u-emoji">🤔</span>Mild urgency</button>
+          <button class="urgency-btn" data-level="3" onclick="selectUrgency('bowel',3,this)"><span class="u-emoji">😰</span>Moderate urgency</button>
+          <button class="urgency-btn" data-level="4" onclick="selectUrgency('bowel',4,this)"><span class="u-emoji">😱</span>Very urgent</button>
+        </div>
+      </div>
+
+      <!-- DURATION -->
+      <div class="form-group">
+        <div class="duration-row">
+          <label class="form-label" style="margin:0">Duration</label>
+          <span class="duration-value" id="bowelDurVal">5 min</span>
+        </div>
+        <input type="range" class="duration-slider" id="bowelDuration" min="0" max="30" value="5"
+          oninput="document.getElementById('bowelDurVal').textContent=this.value<1?'<1 min':this.value+' min'">
+        <div class="duration-ticks"><span>&lt;1</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30+</span></div>
+      </div>
+
+      <!-- SYMPTOMS -->
+      <div class="form-group">
+        <label class="form-label">Symptoms</label>
+        <div class="symptom-list">
+          <label class="symptom-item"><input type="checkbox" id="bSym1" checked><div class="symptom-box">✓</div><span class="symptom-label">Felt complete / satisfying</span></label>
+          <label class="symptom-item"><input type="checkbox" id="bSym2"><div class="symptom-box">✓</div><span class="symptom-label">Had to strain</span></label>
+          <label class="symptom-item"><input type="checkbox" id="bSym3"><div class="symptom-box">✓</div><span class="symptom-label">Experienced pain</span></label>
+          <label class="symptom-item"><input type="checkbox" id="bSym4"><div class="symptom-box">✓</div><span class="symptom-label">Noticed blood</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
         <label class="form-label">Notes (optional)</label>
-        <textarea class="notes-input" id="bowelNotes" rows="2" placeholder="Any notes..."></textarea>
+        <textarea class="notes-input" id="bowelNotes" rows="2" placeholder="Any additional observations, foods eaten, medications, etc."></textarea>
       </div>
       <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="submitLog('bowel')">Log Bowel</button>
     </div>
@@ -1536,9 +1741,22 @@ function openModal() {
   document.getElementById('urineNotes').value = '';
   document.getElementById('bowelNotes').value = '';
   document.querySelectorAll('.urine-swatch').forEach(s=>s.classList.remove('selected'));
-  document.querySelectorAll('.bristol-btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('urineColorLabel').textContent = 'Select a color above';
+  document.querySelectorAll('#bristolSelect .bristol-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('urineColorLabel').textContent = 'Select a color above or scan';
   document.getElementById('urinePreview').style.background = 'transparent';
+  // Reset urgency
+  urineUrgency = 1; bowelUrgency = 1;
+  document.querySelectorAll('#urineUrgencyGrid .urgency-btn').forEach((b,i)=>b.classList.toggle('selected',i===0));
+  document.querySelectorAll('#bowelUrgencyGrid .urgency-btn').forEach((b,i)=>b.classList.toggle('selected',i===0));
+  // Reset duration
+  document.getElementById('urineDuration').value = 1;
+  document.getElementById('urineDurVal').textContent = '1 min';
+  document.getElementById('bowelDuration').value = 5;
+  document.getElementById('bowelDurVal').textContent = '5 min';
+  // Reset symptoms
+  ['uSym1','uSym2','uSym3','uSym4'].forEach(id=>document.getElementById(id).checked=false);
+  document.getElementById('bSym1').checked = true;
+  ['bSym2','bSym3','bSym4'].forEach(id=>document.getElementById(id).checked=false);
   selectType('urine');
 }
 
@@ -1636,6 +1854,14 @@ function submitLog(type) {
     entry.color = state.selectedUrineColor;
     entry.colorLabel = urineData[state.selectedUrineColor-1].label;
     entry.colorBg = urineData[state.selectedUrineColor-1].bg;
+    entry.urgency = urineUrgency;
+    entry.duration = parseInt(document.getElementById('urineDuration').value);
+    entry.symptoms = [
+      document.getElementById('uSym1').checked ? 'Felt complete' : null,
+      document.getElementById('uSym2').checked ? 'Burning/discomfort' : null,
+      document.getElementById('uSym3').checked ? 'Cloudy appearance' : null,
+      document.getElementById('uSym4').checked ? 'Blood noticed' : null,
+    ].filter(Boolean);
     entry.notes = document.getElementById('urineNotes').value;
   } else {
     if(!state.selectedBristol) { showToast('⚠️ Select a Bristol type'); return; }
@@ -1644,6 +1870,14 @@ function submitLog(type) {
     entry.bristolName = bd.name;
     entry.bristolVisual = bd.visual;
     entry.healthy = bd.healthy;
+    entry.urgency = bowelUrgency;
+    entry.duration = parseInt(document.getElementById('bowelDuration').value);
+    entry.symptoms = [
+      document.getElementById('bSym1').checked ? 'Felt complete' : null,
+      document.getElementById('bSym2').checked ? 'Had to strain' : null,
+      document.getElementById('bSym3').checked ? 'Experienced pain' : null,
+      document.getElementById('bSym4').checked ? 'Blood noticed' : null,
+    ].filter(Boolean);
     entry.notes = document.getElementById('bowelNotes').value;
   }
 
@@ -1671,12 +1905,15 @@ function renderToday() {
   todayEntries.forEach(e=>{
     const div = document.createElement('div');
     div.className = 'entry';
+    const urgStr = e.urgency && e.urgency > 1 ? ` · ${urgencyEmojis[e.urgency]} ${urgencyLabels[e.urgency]}` : '';
+    const durStr = e.duration ? ` · ${e.duration}min` : '';
+    const symStr = e.symptoms && e.symptoms.length ? ` · ${e.symptoms.join(', ')}` : '';
     if(e.type==='urine') {
       div.innerHTML = `
         <div class="entry-type urine" style="background:${e.colorBg}20">🚿</div>
         <div class="entry-info">
-          <div class="entry-title">Urine — Level ${e.color}</div>
-          <div class="entry-detail">${e.colorLabel}${e.notes?' · '+e.notes:''}</div>
+          <div class="entry-title">Urine — Level ${e.color}${urgStr}</div>
+          <div class="entry-detail">${e.colorLabel}${durStr}${symStr}${e.notes?' · '+e.notes:''}</div>
         </div>
         <div class="entry-time">${formatTime(e.time)}</div>
         <button class="entry-delete" onclick="deleteEntry(${e.id})">×</button>
@@ -1685,8 +1922,8 @@ function renderToday() {
       div.innerHTML = `
         <div class="entry-type bowel">${e.bristolVisual}</div>
         <div class="entry-info">
-          <div class="entry-title">Bowel — Type ${e.bristol}</div>
-          <div class="entry-detail">${e.bristolName}${e.notes?' · '+e.notes:''}</div>
+          <div class="entry-title">Bowel — Type ${e.bristol}${urgStr}</div>
+          <div class="entry-detail">${e.bristolName}${durStr}${symStr}${e.notes?' · '+e.notes:''}</div>
         </div>
         <div class="entry-time">${formatTime(e.time)}</div>
         <button class="entry-delete" onclick="deleteEntry(${e.id})">×</button>
@@ -1897,7 +2134,20 @@ function seedDemoIfEmpty() {
   saveData();
 }
 
-// ====== START ======
+// ====== URGENCY ======
+let urineUrgency = 1;
+let bowelUrgency = 1;
+
+function selectUrgency(type, level, btn) {
+  const gridId = type === 'urine' ? 'urineUrgencyGrid' : 'bowelUrgencyGrid';
+  document.querySelectorAll(`#${gridId} .urgency-btn`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  if (type === 'urine') urineUrgency = level;
+  else bowelUrgency = level;
+}
+
+const urgencyLabels = ['', 'No rush', 'Mild urgency', 'Moderate urgency', 'Very urgent'];
+const urgencyEmojis = ['', '😌', '🤔', '😰', '😱'];
 loadData();
 seedDemoIfEmpty();
 init();
